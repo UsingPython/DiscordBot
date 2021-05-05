@@ -41,9 +41,9 @@ export default class BaseBot {
     const commandName = message.content
       .slice(this.config.prefix.length)
       .split(/ +/)[0]
-      .toLowerCase();
+      ?.toLowerCase();
     logger.info(`Command: ${commandName}, args: ${args.join(" ")}`);
-    return [args, commandName];
+    return [args, commandName || ""];
   }
 
   protected getCommand(name: string): Command | undefined {
@@ -53,7 +53,11 @@ export default class BaseBot {
   protected searchAliases(name: string): Command | undefined {
     const command = undefined;
     for (const key in this.commands) {
-      if (this.commands[key].aliases.includes(name)) {
+      if (
+        this.commands[key] != null &&
+        this.commands[key]?.aliases != null &&
+        this.commands[key]!.aliases.includes(name)
+      ) {
         return this.commands[key];
       }
     }

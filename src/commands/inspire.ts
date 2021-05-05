@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Command } from "../typings";
 import logger from "../logger";
+import { Role } from ".prisma/client";
 
 const Inspire: Command = {
   name: "inspire",
@@ -10,18 +11,12 @@ const Inspire: Command = {
   usage: "",
   aliases: [],
   guildOnly: false,
-  execute(message, args) {
-    axios
-      .get("https://inspirobot.me/api?generate=true")
-      .then((result) => {
-        message.channel.send(result.data).catch((err) => logger.error(err));
-      })
-      .catch((err) => {
-        logger.error(err);
-        message.channel
-          .send("Shit just hits the fan...")
-          .catch((e) => logger.error(e));
-      });
+  permission: Role.MEMBER,
+  execute: async (message, args): Promise<void> => {
+    const inspireResult = await axios.get(
+      "https://inspirobot.me/api?generate=true"
+    );
+    await message.channel.send(inspireResult.data);
   },
 };
 

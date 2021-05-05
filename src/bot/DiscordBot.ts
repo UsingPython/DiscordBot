@@ -104,13 +104,19 @@ export default class DiscordBot extends Base implements BotI {
               ? "Unknown-Channel"
               : song.voiceChannel.name
           } \n**Playing** :notes: \`${
-            song.songs[0].video_url
-          }\` \n:newspaper: \`${song.songs[0].title}\``
+            song.songs[0]?.video_url || "VIDEO URL UNKOWN"
+          }\` \n:newspaper: \`${song.songs[0]?.title || "VIDEO TITLE UNKOWN"}\``
         )
         .catch((err) => logger.error(err));
     } else {
       const serverSongs = this.songList.get(guildId);
-      serverSongs?.songs.push(song.songs[0]);
+      if (serverSongs == null)
+        throw new Error("Could not get serverSongs: undefined");
+      if (song.songs[0] == null)
+        throw new Error(
+          "Could not push song to queue, song element is undefined"
+        );
+      serverSongs.songs.push(song.songs[0]);
       message.channel
         .send(
           `:white_check_mark: Added song to the queue \n**Playing** :notes: \`${song.songs[0].video_url}\` \n:newspaper: \`${song.songs[0].title}\``
@@ -121,14 +127,19 @@ export default class DiscordBot extends Base implements BotI {
 
   private playGuildPlaylist(guildId: string): void {
     const guildData = this.songList.get(guildId);
-    if (guildData === undefined) return;
-    guildData?.voiceChannel
-      ?.join()
+    if (
+      guildData == null ||
+      guildData.voiceChannel == null ||
+      guildData.songs[0] == null
+    )
+      return;
+    guildData.voiceChannel
+      .join()
       .then((connection) => {
         guildData.connection = connection;
         guildData.playing = true;
         connection
-          .play(ytdl(guildData.songs[0].video_url))
+          .play(ytdl(guildData.songs[0]!.video_url))
           .on("finish", () => {
             guildData.songs.shift();
             if (guildData.songs.length === 0) {
@@ -191,8 +202,10 @@ export default class DiscordBot extends Base implements BotI {
         const songElement = guildData.songs[i];
         const position = i + 1;
         embed.addField(
-          `${position}. :newspaper: \`${songElement.title}\``,
-          `:notes: \`${songElement.video_url}\``
+          `${position}. :newspaper: \`${
+            songElement?.title || "SONG TITLE UNKOWN"
+          }\``,
+          `:notes: \`${songElement?.video_url || "SONG URL UNKOWN"}\``
         );
       }
       message.channel.send(embed).catch((err) => logger.error(err));
@@ -229,7 +242,11 @@ export default class DiscordBot extends Base implements BotI {
         .catch((err) => logger.error(err));
     } else {
       message.channel
-        .send(`:notes: Playing \`${guildData?.songs[0].title ?? "_unknown_"}\``)
+        .send(
+          `:notes: Playing \`${
+            guildData?.songs[0]?.title ?? "SONG TITLE UNKOWN"
+          }\``
+        )
         .catch((err) => logger.error(err));
     }
   }

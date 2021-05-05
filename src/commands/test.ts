@@ -1,5 +1,5 @@
 import { Command } from "../typings";
-import logger from "../logger";
+import { Role } from ".prisma/client";
 
 const Test: Command = {
   name: "test",
@@ -9,12 +9,10 @@ const Test: Command = {
   guildOnly: false,
   cooldown: 5,
   aliases: [],
-  execute(message, args) {
-    if (args[0] !== undefined) {
-      message.channel
-        .send("Testing...works!")
-        .catch((err) => logger.error(err));
-    }
+  permission: Role.MEMBER,
+  execute: async (message, args): Promise<void> => {
+    if (args[0] == null) throw new Error("Args undefined");
+    message.channel.send("Testing...works!");
   },
 };
 

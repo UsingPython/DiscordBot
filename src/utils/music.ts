@@ -3,7 +3,7 @@ import ytdl, { MoreVideoDetails } from "ytdl-core";
 import ytsr, { Video } from "ytsr";
 import logger from "../logger";
 
-export function validateVoiceChannel(message: Message): boolean {
+export const validateVoiceChannel = (message: Message): boolean => {
   if (message.member?.voice.channel == null) {
     message.channel
       .send("You need to be in a voice channel to play music!")
@@ -26,13 +26,13 @@ export function validateVoiceChannel(message: Message): boolean {
       return true;
     }
   }
-}
+};
 
-export async function requestSongInfo(
+export const requestSongInfo = async (
   message: Message,
   args: string[]
-): Promise<MoreVideoDetails | undefined> {
-  if (args.length === 1 && ytdl.validateURL(args[0])) {
+): Promise<MoreVideoDetails | undefined> => {
+  if (args.length === 1 && args[0] != null && ytdl.validateURL(args[0])) {
     try {
       const videoInfo = await ytdl.getInfo(args[0]);
       return videoInfo.videoDetails;
@@ -65,11 +65,11 @@ export async function requestSongInfo(
       return undefined;
     }
   }
-}
+};
 
-export async function searchQuery(
+export const searchQuery = async (
   args: string[]
-): Promise<Video[] | undefined> {
+): Promise<Video[] | undefined> => {
   try {
     const searchResults = await ytsr(args.join(" "), { limit: 100 });
     const top10VideoInfo: Video[] = [];
@@ -84,14 +84,14 @@ export async function searchQuery(
     logger.error(err);
     return undefined;
   }
-}
+};
 
-export function filterSearchReactions(
+export const filterSearchReactions = (
   reaction: MessageReaction,
   user: User
-): boolean {
+): boolean => {
   return searchReactions.includes(reaction.emoji.name);
-}
+};
 
 export const searchReactions: string[] = [
   "1️⃣",

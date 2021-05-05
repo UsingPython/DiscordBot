@@ -1,3 +1,4 @@
+import { Role } from ".prisma/client";
 import { Command } from "../typings";
 
 const Now: Command = {
@@ -8,9 +9,9 @@ const Now: Command = {
   usage: "",
   aliases: [],
   guildOnly: true,
-  execute(message, args) {
+  permission: Role.MEMBER,
+  execute: async (message, args): Promise<void> => {
     const voiceChannelUser = message.member?.voice.channel;
-
     message.client.emit("currentSong", voiceChannelUser?.guild.id, message);
   },
 };

@@ -1,3 +1,4 @@
+import { Role } from ".prisma/client";
 import {
   Message,
   ActivityType,
@@ -29,7 +30,8 @@ export interface Command {
   readonly args: boolean;
   readonly guildOnly: boolean;
   readonly aliases: string[];
-  execute: (message: Message, args: string[]) => void;
+  readonly permission: Role;
+  execute: (message: Message, args: string[]) => Promise<void>;
 }
 
 export type Commands = {

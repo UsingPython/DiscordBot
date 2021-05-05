@@ -1,5 +1,6 @@
 import { Command } from "../typings";
 import logger from "../logger";
+import { Role } from ".prisma/client";
 
 function fib(n: number): number {
   const phi = (1 + Math.sqrt(5)) / 2;
@@ -15,14 +16,14 @@ const Fib: Command = {
   guildOnly: true,
   cooldown: 2,
   aliases: [],
-  execute(message, args) {
+  permission: Role.MEMBER,
+  execute: async (message, args): Promise<void> => {
+    if (args[0] == null) throw new Error("Args undefined");
     const inputNumber = parseFloat(args[0]);
     if (!isNaN(inputNumber)) {
-      message.channel.send(fib(inputNumber)).catch((err) => logger.error(err));
+      await message.channel.send(fib(inputNumber));
     } else {
-      message.channel
-        .send(`Is \`${args[0]}\` really a valid number?`)
-        .catch((err) => logger.error(err));
+      await message.channel.send(`Is \`${args[0]}\` really a valid number?`);
     }
   },
 };

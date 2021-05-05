@@ -1,6 +1,6 @@
 import { Command, QueueSong } from "../typings";
 import * as music from "../utils/music";
-import logger from "../logger";
+import { Role } from ".prisma/client";
 
 const Play: Command = {
   name: "play",
@@ -10,36 +10,31 @@ const Play: Command = {
   usage: "<youtube-video-url>",
   aliases: [],
   guildOnly: true,
-  execute(message, args) {
+  permission: Role.MEMBER,
+  execute: async (message, args): Promise<void> => {
     const voiceChannelUser = message.member?.voice.channel;
 
     if (music.validateVoiceChannel(message)) {
-      music
-        .requestSongInfo(message, args)
-        .then((videoInfo) => {
-          if (videoInfo === undefined) {
-            message.channel
-              .send("Invalid Youtube-Link!")
-              .catch((err) => logger.error(err));
-          } else {
-            const serverQueue: QueueSong = {
-              textChannel: message.channel,
-              voiceChannel: voiceChannelUser,
-              connection: null,
-              songs: [],
-              volume: 5,
-              playing: false,
-            };
-            serverQueue.songs.push(videoInfo);
-            message.client.emit(
-              "addSong",
-              serverQueue,
-              voiceChannelUser?.guild.id,
-              message
-            );
-          }
-        })
-        .catch((err) => logger.error(err));
+      const videoInfo = await music.requestSongInfo(message, args);
+      if (videoInfo == null) {
+        await message.channel.send("Invalid Youtube-Link!");
+      } else {
+        const serverQueue: QueueSong = {
+          textChannel: message.channel,
+          voiceChannel: voiceChannelUser,
+          connection: null,
+          songs: [],
+          volume: 5,
+          playing: false,
+        };
+        serverQueue.songs.push(videoInfo);
+        message.client.emit(
+          "addSong",
+          serverQueue,
+          voiceChannelUser?.guild.id,
+          message
+        );
+      }
     }
   },
 };

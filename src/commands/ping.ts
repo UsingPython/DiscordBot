@@ -1,5 +1,5 @@
 import { Command } from "../typings";
-import logger from "../logger";
+import { Role } from ".prisma/client";
 
 const Ping: Command = {
   name: "ping",
@@ -9,10 +9,9 @@ const Ping: Command = {
   args: false,
   aliases: [],
   guildOnly: false,
-  execute: (message, args): void => {
-    message.channel.send("Pong").catch((err) => {
-      logger.error(err);
-    });
+  permission: Role.MEMBER,
+  execute: async (message, args): Promise<void> => {
+    message.channel.send("Pong");
   },
 };
 
